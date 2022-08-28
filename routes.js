@@ -67,7 +67,7 @@ routes.post("/add", async (req, res) => {
   let name = req.body.name;
 
   if (!name) {
-    name = suggestName();
+    name = await suggestName();
   } else {
     if (!(await isAvailable(name))) {
       return res.send(errorResponse(409, "this Name is not available"));

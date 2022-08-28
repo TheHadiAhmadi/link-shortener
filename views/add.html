@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+  </head>
+  <body class="h-full flex items-center bg-gray-200 justify-center">
+    <div class="mx-4 p-4 bg-white border border-gray-300 rounded shadow-lg">
+        <div class=" pb-4 text-center text-teal-500 font-bold">
+            Enter Your long Url and optionally a simple name
+        </div>
+      <form class="flex flex-col justify-stretch" action="/add" method="POST">
+        <label class="w-full">
+            <span class="mx-1 block text-gray-600">Link:</span> 
+          <input placeholder="https://long-url....." required class="outline-none px-2 w-full py-1 bg-gray-100 border border-gray-300 rounded" type="url" name="link" />
+        </label>
+        <label class="w-full mt-2">
+            <span class="mx-1 block text-gray-600">Name: </span>
+          <input placeholder="simple-name" class="outline-none px-2 w-full py-1 bg-gray-100 border border-gray-300 rounded" name="name" />
+        </label>
+        <input class="py-1 rounded flex items-center justify-center px-2 bg-teal-500 text-white mt-4" type="submit">
+      </form>
+    </div>
+  </body>
+</html>

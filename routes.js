@@ -1,25 +1,15 @@
 const router = require("express").Router;
+const path = require("path");
+const fs = require("fs/promises");
 const deta = require("deta").Deta(process.env.DETA_PROJECT_KEY);
 const links = deta.Base("links");
-
-// const links = [];
 const routes = router();
 
-routes.get("/", (req, res) => res.send("Server is running!"));
-
-// types of response
-
-// success {status: 2xx, message: string, data: object}
-// error {status: 4xx, message: string}
-
 async function isAvailable(name) {
-  //   const links = deta.Base('links')
-    const result = await links.fetch({name}, {limit: 1})
-    console.log(result)
-    if(result.length === 0) return true
-    return false
-//   return links.findIndex((link) => link.name === name) === -1;
-  // return true
+  const result = await links.fetch({ name }, { limit: 1 });
+  console.log(result.items);
+  if (result.items.length === 0) return true;
+  return false;
 }
 
 function randomString(length) {
@@ -51,18 +41,25 @@ function successResponse(status, message, data) {
 }
 
 function addLink({ name, link }) {
-  return links.insert({ name, link });
-// const id = randomString(16)
-// links.push({name, link, id})
-// return {name, link, id}
+  return links.insert({ name, link, clicks: 0 });
 }
 
+routes.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "./views/add.html"));
+});
+
+routes.get("/success", async (req, res) => {
+  const link = req.query.link;
+
+  let fileContent = await fs.readFile(
+    path.join(__dirname, "views/success.html"),
+    "utf-8"
+  );
+  fileContent = fileContent.replace(/LINK/g, link);
+  res.send(fileContent);
+});
+
 routes.post("/add", async (req, res) => {
-  // create new short link
-
-  // if name is specified => check availability
-  // if !available return error response
-
   const link = req.body.link;
 
   if (!link) return res.send(errorResponse(400, "invalid input"));
@@ -79,18 +76,26 @@ routes.post("/add", async (req, res) => {
 
   const result = await addLink({ name, link });
 
-  return res.send(successResponse(200, "Link created successfully", result));
+  req.link = link.link;
+  return res.redirect(`/success?link=${result.name}`);
 });
 
-routes.get('/:name', async (req, res) => {
-    const name = req.params.name
+routes.get("/:name", async (req, res) => {
+  const name = req.params.name;
 
-    const link = await links.fetch({name}, {limit: 1})
+  const { items } = await links.fetch({ name }, { limit: 1 });
 
-    console.log(link)
-    if(link.length === 0) return res.send(errorResponse(404, "this Link is not available"))
+  console.log(items);
+  if (items.length === 0)
+    return res.send(errorResponse(404, "this Link is not available"));
+  const link = items[0];
 
-    return res.redirect(link[0].link)
-})
+  await links.update(
+    { name: link.name, clicks: (link.clicks ?? 0) + 1 },
+    link.key
+  );
+
+  return res.redirect(link.link);
+});
 
 module.exports = routes;

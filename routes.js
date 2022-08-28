@@ -1,7 +1,11 @@
 const router = require("express").Router;
 const path = require("path");
 const fs = require("fs/promises");
+const config = require('dotenv').config()
+console.log({config})
+
 const deta = require("deta").Deta(process.env.DETA_PROJECT_KEY);
+
 const links = deta.Base("links");
 const routes = router();
 
